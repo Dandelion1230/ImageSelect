@@ -11,6 +11,6 @@ import com.bumptech.glide.Glide;
 
 public class ImageLoadUtils {
     public static void imageLoad(Context mContext, String imagePath, ImageView mImageView) {
-        Glide.with(mContext).load(imagePath).fitCenter().into(mImageView);
+        Glide.with(mContext).load(imagePath).into(mImageView);
     }
 }

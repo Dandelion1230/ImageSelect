@@ -1,6 +1,8 @@
 package com.android.imageselect.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,11 +14,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.imageselect.ImageSelectActivity;
+import com.android.imageselect.PhotoDetailActivity;
 import com.android.imageselect.R;
+import com.android.imageselect.listener.OnImageClickListener;
 import com.android.imageselect.utils.ImageBean;
 import com.android.imageselect.utils.ImageLoadUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -28,6 +33,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private Context mContext;
     private List<String> imageSelects = new ArrayList<>();
     private OnSelectClickListener mOnSelectClickListener;
+    private OnImageClickListener mOnImageClickListener;
 
 
 
@@ -38,6 +44,10 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void setOnSelectClickListener(OnSelectClickListener mOnSelectClickListener) {
         this.mOnSelectClickListener = mOnSelectClickListener;
+    }
+
+    public void setOnImageClickListener(OnImageClickListener mOnImageClickListener) {
+        this.mOnImageClickListener = mOnImageClickListener;
     }
 
     @Override
@@ -60,7 +70,13 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         viewHolder.mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, "图片点击", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, "图片点击", Toast.LENGTH_SHORT).show();
+//                Intent intent = new Intent(mContext, PhotoDetailActivity.class);
+//                intent.putExtra("ImageData", imagePaths);
+//                intent.putExtra("position", position);
+//                mContext.startActivity(intent);
+                mOnImageClickListener.onImageClick(imagePaths, position);
+
             }
         });
         viewHolder.mCbSelect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

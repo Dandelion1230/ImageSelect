@@ -5,10 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.imageselect.R;
+import com.android.imageselect.listener.OnDeleteClickListener;
+import com.android.imageselect.listener.OnImageClickListener;
 import com.android.imageselect.utils.ImageLoadUtils;
 
 import java.util.List;
@@ -20,6 +22,18 @@ import java.util.List;
 public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context mContext;
     private List<String> mSelectPaths;
+    private OnImageClickListener mOnImageClickListener;
+    private OnDeleteClickListener mOnDeleteClickListener;
+//    private int delPosition;
+
+    public void setOnImageClickListener(OnImageClickListener mOnImageClickListener) {
+        this.mOnImageClickListener = mOnImageClickListener;
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener mOnDeleteClickListener) {
+        this.mOnDeleteClickListener = mOnDeleteClickListener;
+    }
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         mContext = parent.getContext();
@@ -27,9 +41,24 @@ public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+//        this.delPosition = position;
         ViewHolder viewHolder = (ViewHolder) holder;
         ImageLoadUtils.imageLoad(mContext, mSelectPaths.get(position), viewHolder.mImageView);
+        viewHolder.mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnImageClickListener.onImageClick(mSelectPaths, position);
+            }
+        });
+        viewHolder.mDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mOnDeleteClickListener.onDelete(position, mSelectPaths.get(position));
+//                mSelectPaths.remove(position);
+//                notifyItemRemoved(position);
+            }
+        });
     }
 
     public void addItem(int position, List<String> mSelectPaths) {
@@ -40,7 +69,14 @@ public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public void removedItem(int position, List<String> mSelectPaths) {
         this.mSelectPaths = mSelectPaths;
-        notifyItemRemoved(position);
+//        notifyItemRemoved(position);
+        notifyDataSetChanged();
+    }
+
+    public void removedItem(int position) {
+        mSelectPaths.remove(position);
+//        notifyItemRemoved(position);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -51,12 +87,12 @@ public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView mImageView;
-        private ImageView mDelete;
+        private TextView mDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mImageView = (ImageView) itemView.findViewById(R.id.select_image);
-//            mDelete = (ImageView) itemView.findViewById(R.id.image_translucence);
+            mDelete = (TextView) itemView.findViewById(R.id.tv_delete);
         }
     }
 

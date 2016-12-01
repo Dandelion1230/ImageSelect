@@ -1,5 +1,6 @@
 package com.android.imageselect;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,8 @@ import android.widget.Toast;
 
 import com.android.imageselect.adapter.ImageAdapter;
 import com.android.imageselect.adapter.SelectAdapter;
+import com.android.imageselect.listener.OnDeleteClickListener;
+import com.android.imageselect.listener.OnImageClickListener;
 import com.android.imageselect.utils.DividerGridItemDecoration;
 import com.android.imageselect.utils.ImageBean;
 import com.android.imageselect.utils.ImageScanningUtils;
@@ -44,6 +47,10 @@ public class ImageSelectActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what == 0x110) {
+                if (utils.mImgDir == null) {
+                    Toast.makeText(ImageSelectActivity.this, "一张图片都没有哦", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 parentFile = utils.mImgDir.toString();
                 imagePahts = Arrays.asList(utils.mImgDir.list());
                 imageBeans = new ArrayList<>();
@@ -94,6 +101,11 @@ public class ImageSelectActivity extends AppCompatActivity {
         // 设置item动画
         mSelectRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mSelectRecyclerView.setAdapter(mSelectAdapter);
+        setListener();
+
+    }
+
+    private void setListener() {
         mAdapter.setOnSelectClickListener(new ImageAdapter.OnSelectClickListener() {
             @Override
             public void onAddItem(int position, List<String> selectImages) {
@@ -107,7 +119,41 @@ public class ImageSelectActivity extends AppCompatActivity {
                 mSelectAdapter.removedItem(position, selectImages);
                 mConfrim.setText("确认"+selectImages.size()+"/9");
             }
-
+        });
+        mAdapter.setOnImageClickListener(new OnImageClickListener<ImageBean>() {
+            @Override
+            public void onImageClick(List<ImageBean> mImageDatas, int position) {
+                Intent intent = new Intent(ImageSelectActivity.this, PhotoDetailActivity.class);
+                List<String> imageDatas = new ArrayList<>();
+                for (int i = 0; i < mImageDatas.size(); i++) {
+                    imageDatas.add(mImageDatas.get(i).getImagePath());
+                }
+                intent.putStringArrayListExtra("ImageData", (ArrayList<String>) imageDatas);
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+        });
+        mSelectAdapter.setOnImageClickListener(new OnImageClickListener<String>() {
+            @Override
+            public void onImageClick(List<String> mImageDatas, int position) {
+                Intent intent = new Intent(ImageSelectActivity.this, PhotoDetailActivity.class);
+                intent.putStringArrayListExtra("ImageData", (ArrayList<String>)mImageDatas);
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+        });
+        mSelectAdapter.setOnDeleteClickListener(new OnDeleteClickListener() {
+            @Override
+            public void onDelete(int position, String selectPath) {
+                mSelectAdapter.removedItem(position);
+                ImageBean bean = new ImageBean();
+                bean.setSelect(true);
+                bean.setImagePath(selectPath);
+                int index = imageBeans.indexOf(bean);
+                imageBeans.get(index).setSelect(false);
+                mAdapter.notifyItemChanged(index);
+                mConfrim.setText("确认"+mSelectAdapter.getItemCount()+"/9");
+            }
         });
     }
 }
